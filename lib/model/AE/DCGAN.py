@@ -55,7 +55,10 @@ class Generator(nn.Module):
             nn.ConvTranspose2d(128, 64, 4, 2, 1, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(True),
-            nn.ConvTranspose2d(64, 1, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(64, 64, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(True),
+            nn.Conv2d(64, 1, 1, 1, 0, bias=False)
             # nn.Tanh()
         )
 
