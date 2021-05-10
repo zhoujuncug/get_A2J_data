@@ -59,12 +59,10 @@ class Generator(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(True),
             nn.Conv2d(64, 1, 1, 1, 0, bias=False)
-            # nn.Tanh()
         )
 
     def forward(self, input):
         output = self.main(input)
-        # output = 5 * output
         return output
 
 

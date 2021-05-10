@@ -33,7 +33,7 @@ TestImgFrames = 8252
 keypointsNumber = 14
 cropWidth = 176
 cropHeight = 176
-batch_size = 64
+batch_size = 16
 learning_rate = 0.00035
 Weight_Decay = 1e-4
 nepoch = 100
@@ -88,17 +88,9 @@ def weights_init(m):
 
 netE = Encoder().cuda()
 netE.apply(weights_init)
-pred_E = torch.load('output/checkpoint/nyu/AE/ae/epoch_27/E.pth')
-for n, p in netE.named_parameters():
-    if n in pred_E.keys():
-        p = pred_E[n]
 
 netG = Generator().cuda()
 netG.apply(weights_init)
-pred_G = torch.load('output/checkpoint/nyu/AE/ae/epoch_27/G.pth')
-for n, p in netG.named_parameters():
-    if n in pred_G.keys():
-        p = pred_G[n]
 
 
 netD = Discriminator().cuda()
@@ -160,7 +152,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
 
         recG = torch.nn.functional.l1_loss(img, fake) * 5
 
-        LossG = recG + errG if is_gan else recG
+        LossG = recG + errG if False else recG
         # LossG = errG
         LossG.backward()
 
@@ -171,7 +163,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
             oG -= 1
             print('G')
             optimizerG.step()
-            optimizerE.step()
+            # optimizerE.step()
 
         print(f'[{epoch}/{nepoch}][{i}/{len(dataloader)}] {phase} Loss_D: {errD.item():.4f} Loss_G: {LossG.item():.4f} errG: {errG.item():.4f} RecG: {recG.item():.4f} D(x): {D_x:.4f} D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}\tpD: {p_D:.2f}\tpE: {p_G:.2f}')
 
@@ -187,14 +179,12 @@ for epoch in range(nepoch):
 
     is_gan = False # if epoch > 0 else False
     if epoch in [0, 1]:
-        p_D = 1/3.
-    elif epoch in [2, 3, 4]:
-        p_D = 1/3.
+        p_D = 1.
     else: 
-        p_D = 1/3.
-    p_G = 1
+        p_D = 1.
+    p_G = 1.
 
-    log_dir = 'AE/ae/'
+    log_dir = 'AE/gan/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
