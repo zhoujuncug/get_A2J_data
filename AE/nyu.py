@@ -25,7 +25,7 @@ from lib.model.AE.DCGAN import Encoder, Generator, Discriminator
 from lib.dataset.NYU.nyu import nyu_dataloader, center_train, train_lefttop_pixel, train_rightbottom_pixel, keypointsUVD_train, batch_size
 from lib.dataset.NYU.nyu import center_test, test_lefttop_pixel, test_rightbottom_pixel, keypointsUVD_test, errorCompute, writeTxt
 from lib.utils.AE.nyu.utils import show_batch_img
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # DataHyperParms 
 TrainImgFrames = 72757
@@ -152,14 +152,14 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
 
         recG = torch.nn.functional.l1_loss(img, fake) * 5 * 5
 
-        LossG = recG + errG if False else recG
+        LossG = recG + errG if is_gan else recG
         # LossG = errG
         LossG.backward()
 
         D_G_z2 = output.mean().item()
 
         oG += p_G
-        if oG >= 1 and is_gan:
+        if oG >= 1:
             oG -= 1
             print('G')
             optimizerG.step()
@@ -179,12 +179,12 @@ for epoch in range(nepoch):
 
     is_gan = True # if epoch > 0 else False
     if epoch in [0, 1]:
-        p_D = 1.
+        p_D = 1 / 3.
     else: 
-        p_D = 1.
+        p_D = 1 / 3.
     p_G = 1.
 
-    log_dir = 'AE/gan_SB_BigRecLoss/'
+    log_dir = 'AE/SB_BRL_D033G100/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
