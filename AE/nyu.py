@@ -189,7 +189,7 @@ for epoch in range(nepoch):
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
 
-    os.makedirs(f'./output/checkpoint/nyu/' + log_dir + 'epoch_{epoch}', exist_ok=True)
+    os.makedirs(f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}', exist_ok=True)
     torch.save(netE.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/E.pth')
     torch.save(netG.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/G.pth')
     torch.save(netD.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/D.pth')
