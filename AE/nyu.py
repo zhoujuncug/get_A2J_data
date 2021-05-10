@@ -150,7 +150,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         output = netD(fake)
         errG = criterion(output, label)
 
-        recG = torch.nn.functional.l1_loss(img, fake) * 5
+        recG = torch.nn.functional.l1_loss(img, fake) * 5 * 5
 
         LossG = recG + errG if False else recG
         # LossG = errG
@@ -184,7 +184,7 @@ for epoch in range(nepoch):
         p_D = 1.
     p_G = 1.
 
-    log_dir = 'AE/gan_small_batch/'
+    log_dir = 'AE/gan_SB_BigRecLoss/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
