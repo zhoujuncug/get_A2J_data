@@ -25,7 +25,7 @@ from lib.model.AE.DCGAN import Encoder, Generator, Discriminator
 from lib.dataset.NYU.nyu import nyu_dataloader, center_train, train_lefttop_pixel, train_rightbottom_pixel, keypointsUVD_train, batch_size
 from lib.dataset.NYU.nyu import center_test, test_lefttop_pixel, test_rightbottom_pixel, keypointsUVD_test, errorCompute, writeTxt
 from lib.utils.AE.nyu.utils import show_batch_img
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 # DataHyperParms 
 TrainImgFrames = 72757
@@ -168,7 +168,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         print(f'[{epoch}/{nepoch}][{i}/{len(dataloader)}] {phase} Loss_D: {errD.item():.4f} Loss_G: {LossG.item():.4f} errG: {errG.item():.4f} RecG: {recG.item():.4f} D(x): {D_x:.4f} D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}\tpD: {p_D:.2f}\tpE: {p_G:.2f}')
 
         if i % 1000 == 0:
-            os.makedirs('output/log/nyu/AE', exist_ok=True)
+            os.makedirs(f'output/log/nyu/{log_dir}', exist_ok=True)
             real_fake = torch.cat([img[:, None, :, :, :], fake[:, None, :, :, :]], dim=1)
             real_fake = real_fake.view([-1, img.shape[1], img.shape[2], img.shape[3]])
             show_batch_img(real_fake, 'output/log/nyu/' + log_dir + f'{epoch}_{i}_{phase}.jpg', nrow=8)
@@ -184,7 +184,7 @@ for epoch in range(nepoch):
         p_D = 1.
     p_G = 1.
 
-    log_dir = 'AE/gan/'
+    log_dir = 'AE/pure_gan/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
