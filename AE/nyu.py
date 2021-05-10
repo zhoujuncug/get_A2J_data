@@ -138,7 +138,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         errD = errD_real + errD_fake
 
         oD += p_D
-        if oD >= 1:
+        if oD >= 1 and is_gan:
             oD -= 1
             print('D')
             optimizerD.step()
@@ -159,11 +159,11 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         D_G_z2 = output.mean().item()
 
         oG += p_G
-        if oG >= 1:
+        if oG >= 1 and is_gan:
             oG -= 1
             print('G')
             optimizerG.step()
-            # optimizerE.step()
+            optimizerE.step()
 
         print(f'[{epoch}/{nepoch}][{i}/{len(dataloader)}] {phase} Loss_D: {errD.item():.4f} Loss_G: {LossG.item():.4f} errG: {errG.item():.4f} RecG: {recG.item():.4f} D(x): {D_x:.4f} D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}\tpD: {p_D:.2f}\tpE: {p_G:.2f}')
 
@@ -177,14 +177,14 @@ for epoch in range(nepoch):
     netE, netG, netD = netE.cuda(), netG.cuda(), netD.cuda()
     timer = time.time()
 
-    is_gan = False # if epoch > 0 else False
+    is_gan = True # if epoch > 0 else False
     if epoch in [0, 1]:
         p_D = 1.
     else: 
         p_D = 1.
     p_G = 1.
 
-    log_dir = 'AE/pure_gan/'
+    log_dir = 'AE/gan_small_batch/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
