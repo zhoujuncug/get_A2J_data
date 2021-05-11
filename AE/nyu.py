@@ -25,7 +25,7 @@ from lib.model.AE.DCGAN import Encoder, Generator, Discriminator
 from lib.dataset.NYU.nyu import nyu_dataloader, center_train, train_lefttop_pixel, train_rightbottom_pixel, keypointsUVD_train, batch_size
 from lib.dataset.NYU.nyu import center_test, test_lefttop_pixel, test_rightbottom_pixel, keypointsUVD_test, errorCompute, writeTxt
 from lib.utils.AE.nyu.utils import show_batch_img
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # DataHyperParms 
 TrainImgFrames = 72757
@@ -46,8 +46,8 @@ RandScale = (1.0, 0.5)
 xy_thres = 110
 depth_thres = 150
 
-trainingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/train_nyu/'
-testingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/test_nyu/'  # mat images
+trainingImageDir = '/home/jun/Projects/A2J/nyu_hand_dataset_v2/train_nyu/'
+testingImageDir = '/home/jun/Projects/A2J/nyu_hand_dataset_v2/test_nyu/'  # mat images
 test_center_file = './data/nyu/nyu_center_test.mat'
 test_keypoint_file = './data/nyu/nyu_keypointsUVD_test.mat'
 train_center_file = './data/nyu/nyu_center_train.mat'
