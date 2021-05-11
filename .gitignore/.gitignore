@@ -1,0 +1,14 @@
+*.jpg
+*.png
+*.log
+*.pth
+*.npy
+output/
+checkpint/
+log/
+result/
+*.mat
+*.m
+__pycache__/
+.pyc
+.idea/
