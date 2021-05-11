@@ -178,13 +178,15 @@ for epoch in range(nepoch):
     timer = time.time()
 
     is_gan = True # if epoch > 0 else False
-    if epoch in [0, 1]:
+    if epoch in [0]:
         p_D = 1 / 3.
-    else: 
-        p_D = 1 / 3.
+    elif epoch in [1]: 
+        p_D = 1 / 6.
+    else:
+        p_D = 1 / 10.
     p_G = 1.
 
-    log_dir = 'AE/SB_BRL_D033G100/'
+    log_dir = 'AE/SB_BRL_D010G100/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
