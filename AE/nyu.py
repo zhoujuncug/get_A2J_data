@@ -1,5 +1,5 @@
 import sys 
-sys.path.append('/root/get_A2J_data')
+sys.path.append('/home/jun/Projects/get_A2J_data')
 
 import cv2
 import torch
@@ -150,7 +150,11 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         output = netD(fake)
         errG = criterion(output, label)
 
-        recG = torch.nn.functional.l1_loss(img, fake) * 5
+        recG = torch.nn.functional.l1_loss(img, fake)
+
+        with torch.no_grad():
+            ratio = errG.item() / recG.item()
+        recG = recG * ratio
 
         LossG = recG + errG if is_gan else recG
         # LossG = errG
@@ -179,17 +183,17 @@ for epoch in range(nepoch):
 
     is_gan = True # if epoch > 0 else False
     if epoch in [0, 1]:
-        p_D = 1/2.
+        p_D = 1.
     else: 
-        p_D = 1/2.
+        p_D = 1.
     p_G = 1.
 
-    log_dir = 'AE/instanceBN/'
+    log_dir = 'AE/IN_SRL_D1G1/'
+    os.makedirs(f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}', exist_ok=True)
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
 
-    os.makedirs(f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}', exist_ok=True)
     torch.save(netE.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/E.pth')
     torch.save(netG.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/G.pth')
     torch.save(netD.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/D.pth')
