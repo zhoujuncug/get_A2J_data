@@ -92,7 +92,6 @@ netE.apply(weights_init)
 netG = Generator().cuda()
 netG.apply(weights_init)
 
-
 netD = Discriminator().cuda()
 netD.apply(weights_init)
 
@@ -150,7 +149,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         output = netD(fake)
         errG = criterion(output, label)
 
-        recG = torch.nn.functional.l1_loss(img, fake) * 5 * 5
+        recG = torch.nn.functional.l1_loss(img, fake) * 5 * 5 * 4
 
         LossG = recG + errG if is_gan else recG
         # LossG = errG
@@ -179,11 +178,11 @@ for epoch in range(nepoch):
 
     is_gan = True # if epoch > 0 else False
     if epoch in [0]:
-        p_D = 1 / 3.
+        p_D = 1 / 2.
     elif epoch in [1]: 
-        p_D = 1 / 6.
+        p_D = 1 / 3.
     else:
-        p_D = 1 / 10.
+        p_D = 1 / 5.
     p_G = 1.
 
     log_dir = 'AE/SB_BRL_D010G100/'
