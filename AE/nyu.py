@@ -185,7 +185,7 @@ for epoch in range(nepoch):
         p_D = 1 / 5.
     p_G = 1.
 
-    log_dir = 'AE/SB_BRL_D010G100/'
+    log_dir = 'AE/SB16_BRL100_D1G5/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
