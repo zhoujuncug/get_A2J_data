@@ -25,7 +25,7 @@ from lib.model.AE.DCGAN import Encoder, Generator, Discriminator
 from lib.dataset.NYU.nyu import nyu_dataloader, center_train, train_lefttop_pixel, train_rightbottom_pixel, keypointsUVD_train, batch_size
 from lib.dataset.NYU.nyu import center_test, test_lefttop_pixel, test_rightbottom_pixel, keypointsUVD_test, errorCompute, writeTxt
 from lib.utils.AE.nyu.utils import show_batch_img
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # DataHyperParms 
 TrainImgFrames = 72757
@@ -33,7 +33,7 @@ TestImgFrames = 8252
 keypointsNumber = 14
 cropWidth = 176
 cropHeight = 176
-batch_size = 16
+batch_size = 64
 learning_rate = 0.00035
 Weight_Decay = 1e-4
 nepoch = 100
@@ -185,7 +185,7 @@ for epoch in range(nepoch):
         p_D = 1 / 5.
     p_G = 1.
 
-    log_dir = 'AE/BDB_SB16_IN_BRL100_D1G5/'
+    log_dir = 'AE/BDB_B64_RL100_D1G5/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
