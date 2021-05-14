@@ -1,5 +1,5 @@
 import sys 
-sys.path.append('/root/get_A2J_data')
+sys.path.append('/root/Workspace/get_A2J_data')
 
 import cv2
 import torch
@@ -48,8 +48,8 @@ RandScale = (1.0, 0.5)
 xy_thres = 110
 depth_thres = 150
 
-trainingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/train_nyu/'
-testingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/test_nyu/'  # mat images
+trainingImageDir = '/root/Dataspace/nyu_hand_dataset_v2/train_nyu/'
+testingImageDir = '/root/Dataspace/nyu_hand_dataset_v2/test_nyu/'  # mat images
 test_center_file = './data/nyu/nyu_center_test.mat'
 test_keypoint_file = './data/nyu/nyu_keypointsUVD_test.mat'
 train_center_file = './data/nyu/nyu_center_train.mat'
@@ -63,13 +63,6 @@ randomseed = 12345
 random.seed(randomseed)
 np.random.seed(randomseed)
 torch.manual_seed(randomseed)
-
-save_dir = './result/NYU_batch_64_12345'
-
-try:
-    os.makedirs(save_dir)
-except OSError:
-    pass
 
 
 train_image_datasets = nyu_dataloader(trainingImageDir, center_train, train_lefttop_pixel, train_rightbottom_pixel, keypointsUVD_train, augment=False)
@@ -98,7 +91,7 @@ netD = Discriminator().cuda()
 netD.apply(weights_init)
 
 netA2J = model.A2J_model(num_classes = keypointsNumber)
-netA2J.load_state_dict(torch.load('./output/checkpoint/A2J/official/NYU.pth'))
+netA2J.load_state_dict(torch.load('/root/Dataspace/output/checkpoint/A2J/official/NYU.pth'))
 netA2J = netA2J.cuda().eval()
 
 criterion = nn.BCELoss()
@@ -180,35 +173,37 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
             optimizerG.step()
             optimizerE.step()
 
-        print(f'[{epoch}/{nepoch}][{i}/{len(dataloader)}] {phase} Loss_D: {errD.item():.4f}    Loss_G: {LossG.item():.4f}' \
-              f'errG: {errG.item():.4f} RecG: {recG.item():.4f} PrecG: {PrecG.item():.4f}     D(x): {D_x:.4f} D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}    ' \
+        print(f'[{epoch}/{nepoch}][{i}/{len(dataloader)}] {phase} Loss_D: {errD.item():.4f}    Loss_G: {LossG.item():.4f}  ' \
+              f'errG: {errG.item():.4f}  RecG: {recG.item():.4f}  PrecG: {PrecG.item():.4f}     D(x): {D_x:.4f}  D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}    ' \
               f'pD: {p_D:.2f} pE: {p_G:.2f}')
 
         if i % 1000 == 0:
-            os.makedirs(f'output/log/nyu/{log_dir}', exist_ok=True)
+            os.makedirs(f'/root/Dataspace/output/log/nyu/{log_dir}', exist_ok=True)
             real_fake = torch.cat([img[:, None, :, :, :], fake[:, None, :, :, :]], dim=1)
             real_fake = real_fake.view([-1, img.shape[1], img.shape[2], img.shape[3]])
-            show_batch_img(real_fake, 'output/log/nyu/' + log_dir + f'{epoch}_{i}_{phase}.jpg', nrow=8)
+            show_batch_img(real_fake, '/root/Dataspace/output/log/nyu/' + log_dir + f'{epoch}_{i}_{phase}.jpg', nrow=8)
 
 for epoch in range(nepoch):
     netE, netG, netD = netE.cuda(), netG.cuda(), netD.cuda()
     timer = time.time()
 
     is_gan = True # if epoch > 0 else False
-    if epoch in [0]:
-        p_D = 1 / 2.
-    elif epoch in [1]: 
-        p_D = 1 / 3.
-    else:
+    if epoch in [0, 1]:
         p_D = 1 / 5.
+    elif epoch in [2, 3]: 
+        p_D = 1 / 3.
+    elif epoch in [4, 5]: 
+        p_D = 1 / 2.
+    else:
+        p_D = 1.
     p_G = 1.
 
-    log_dir = 'AE/Prec_BDB_SB16_IN_BRL100_D1G5/'
+    log_dir = 'AE/Prec_BDB_SB16_IN_BRL100_D1G1/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
 
-    os.makedirs(f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}', exist_ok=True)
-    torch.save(netE.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/E.pth')
-    torch.save(netG.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/G.pth')
-    torch.save(netD.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/D.pth')
+    os.makedirs(f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}', exist_ok=True)
+    torch.save(netE.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'E.pth')
+    torch.save(netG.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'G.pth')
+    torch.save(netD.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'D.pth')
