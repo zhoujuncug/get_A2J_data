@@ -25,6 +25,8 @@ from lib.model.AE.DCGAN import Encoder, Generator, Discriminator
 from lib.dataset.NYU.nyu import nyu_dataloader, center_train, train_lefttop_pixel, train_rightbottom_pixel, keypointsUVD_train, batch_size
 from lib.dataset.NYU.nyu import center_test, test_lefttop_pixel, test_rightbottom_pixel, keypointsUVD_test, errorCompute, writeTxt
 from lib.utils.AE.nyu.utils import show_batch_img
+import lib.model.A2J.model as model
+import lib.model.A2J.anchor as anchor
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # DataHyperParms 
@@ -33,7 +35,7 @@ TestImgFrames = 8252
 keypointsNumber = 14
 cropWidth = 176
 cropHeight = 176
-batch_size = 64
+batch_size = 32
 learning_rate = 0.00035
 Weight_Decay = 1e-4
 nepoch = 100
@@ -95,6 +97,10 @@ netG.apply(weights_init)
 netD = Discriminator().cuda()
 netD.apply(weights_init)
 
+netA2J = model.A2J_model(num_classes = keypointsNumber)
+netA2J.load_state_dict(torch.load('./output/checkpoint/A2J/official/NYU.pth'))
+netA2J = netA2J.cuda().eval()
+
 criterion = nn.BCELoss()
 
 real_label = 1
@@ -139,19 +145,30 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         oD += p_D
         if oD >= 1 and is_gan:
             oD -= 1
-            print('D')
             optimizerD.step()
 
+        ##########
+        # train G
+        ##########
         netG.zero_grad()
         netE.zero_grad()
 
+        # GAN Loss
         label.fill_(real_label)  # fake labels are real for generator cost
         output = netD(fake)
         errG = criterion(output, label)
-
+        
+        # L1 Loss
         recG = torch.nn.functional.l1_loss(img, fake) * 5 * 5 * 4
+        
+        # Preceptual Loss
+        real_head = netA2J(img)
+        fake_head = netA2J(fake)
+        PrecG = 0
+        for r_map, f_map in zip(real_head, fake_head):
+            PrecG += torch.nn.functional.mse_loss(r_map, f_map) * 1/2.
 
-        LossG = recG + errG if is_gan else recG
+        LossG = recG + errG + PrecG if is_gan else recG + PrecG
         # LossG = errG
         LossG.backward()
 
@@ -160,11 +177,12 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         oG += p_G
         if oG >= 1:
             oG -= 1
-            print('G')
             optimizerG.step()
             optimizerE.step()
 
-        print(f'[{epoch}/{nepoch}][{i}/{len(dataloader)}] {phase} Loss_D: {errD.item():.4f} Loss_G: {LossG.item():.4f} errG: {errG.item():.4f} RecG: {recG.item():.4f} D(x): {D_x:.4f} D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}\tpD: {p_D:.2f}\tpE: {p_G:.2f}')
+        print(f'[{epoch}/{nepoch}][{i}/{len(dataloader)}] {phase} Loss_D: {errD.item():.4f}    Loss_G: {LossG.item():.4f}' \
+              f'errG: {errG.item():.4f} RecG: {recG.item():.4f} PrecG: {PrecG.item():.4f}     D(x): {D_x:.4f} D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}    ' \
+              f'pD: {p_D:.2f} pE: {p_G:.2f}')
 
         if i % 1000 == 0:
             os.makedirs(f'output/log/nyu/{log_dir}', exist_ok=True)
@@ -185,7 +203,7 @@ for epoch in range(nepoch):
         p_D = 1 / 5.
     p_G = 1.
 
-    log_dir = 'AE/BDB_B64_RL100_D1G5/'
+    log_dir = 'AE/Prec_BDB_SB16_IN_BRL100_D1G5/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)

@@ -9,7 +9,7 @@ import time
 import random
 import scipy.io as scio
 
-from lib.dataset.nyu_cp import nyu_dataloader
+from lib.dataset.NYU.nyu_cp import nyu_dataloader
 import lib.model.A2J.model as model
 import lib.model.A2J.anchor as anchor
 from lib.utils.utils import pixel2world, world2pixel, errorCompute, writeTxt
@@ -113,7 +113,7 @@ test_dataloaders = torch.utils.data.DataLoader(test_image_datasets, batch_size =
                                              shuffle = False, num_workers = 0)
 
 
-net = model.A2J_model(num_classes = keypointsNumber)
+net = model.A2J_model(num_classes = 14)
 net = net.cuda()
 # net.load_state_dict(torch.load('./output/checkpoint/A2J/official/NYU.pth'))
 
