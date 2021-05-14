@@ -27,7 +27,7 @@ from lib.dataset.NYU.nyu import center_test, test_lefttop_pixel, test_rightbotto
 from lib.utils.AE.nyu.utils import show_batch_img
 import lib.model.A2J.model as model
 import lib.model.A2J.anchor as anchor
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 # DataHyperParms 
 TrainImgFrames = 72757
@@ -195,10 +195,10 @@ for epoch in range(nepoch):
     elif epoch in [4, 5]: 
         p_D = 1 / 2.
     else:
-        p_D = 1.
+        p_D = 1 / 2.
     p_G = 1.
 
-    log_dir = 'AE/Prec_BDB_SB16_IN_BRL100_D1G1/'
+    log_dir = 'AE/Prec_BDB_SB16_IN_BRL100_D1G2/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
