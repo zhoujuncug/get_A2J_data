@@ -180,7 +180,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
             optimizerG.step()
             optimizerE.step()
 
-        print(f'[{epoch}/{nepoch}][{i}/{len(dataloader)}] {phase} Loss_D: {errD.item():.4f}    Loss_G: {LossG.item():.4f}' \
+        print(f'[{epoch}/{nepoch}][{i}/{len(dataloader)}] {phase} Loss_D: {errD.item():.4f}    Loss_G: {LossG.item():.4f} ' \
               f'errG: {errG.item():.4f} RecG: {recG.item():.4f} PrecG: {PrecG.item():.4f}     D(x): {D_x:.4f} D(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}    ' \
               f'pD: {p_D:.2f} pE: {p_G:.2f}')
 
