@@ -35,7 +35,7 @@ TestImgFrames = 8252
 keypointsNumber = 14
 cropWidth = 176
 cropHeight = 176
-batch_size = 32
+batch_size = 16
 learning_rate = 0.00035
 Weight_Decay = 1e-4
 nepoch = 100
@@ -203,7 +203,7 @@ for epoch in range(nepoch):
         p_D = 1 / 5.
     p_G = 1.
 
-    log_dir = 'AE/Prec_BDB_SB16_IN_BRL100_D1G5/'
+    log_dir = 'AE/Prec_BDA_B16_IN_RL100_D1G5/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
