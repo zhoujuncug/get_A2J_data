@@ -190,7 +190,7 @@ for epoch in range(nepoch):
     is_gan = True # if epoch > 0 else False
     if epoch in [0, 1]:
         p_D = 1.
-    elif epoch in [2, 3]
+    elif epoch in [2, 3]:
         p_D = 1 / 2.
     else:
         p_D = 1 / 3.
