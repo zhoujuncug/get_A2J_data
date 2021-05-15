@@ -35,7 +35,7 @@ TestImgFrames = 8252
 keypointsNumber = 14
 cropWidth = 176
 cropHeight = 176
-batch_size = 32
+batch_size = 16
 learning_rate = 0.00035
 Weight_Decay = 1e-4
 nepoch = 100
@@ -155,11 +155,11 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         recG = torch.nn.functional.l1_loss(img, fake) * 5 * 5 * 4
         
         # Preceptual Loss
-        real_head = netA2J(img)
-        fake_head = netA2J(fake)
+        real_head = netA2J(img, True)
+        fake_head = netA2J(fake, True)
         PrecG = 0
         for r_map, f_map in zip(real_head, fake_head):
-            PrecG += torch.nn.functional.mse_loss(r_map, f_map) * 1/2.
+            PrecG += torch.nn.functional.mse_loss(r_map, f_map) * 500.
 
         LossG = recG + errG + PrecG if is_gan else recG + PrecG
         # LossG = errG
@@ -190,15 +190,11 @@ for epoch in range(nepoch):
     is_gan = True # if epoch > 0 else False
     if epoch in [0, 1]:
         p_D = 1 / 5.
-    elif epoch in [2, 3]: 
-        p_D = 1 / 3.
-    elif epoch in [4, 5]: 
-        p_D = 1 / 2.
     else:
-        p_D = 1 / 2.
+        p_D = 1 / 5.
     p_G = 1.
 
-    log_dir = 'AE/Prec_BDB_SB16_IN_BRL100_D1G2/'
+    log_dir = 'AE/P44_BDA_B16_IN_RL100_D1G5/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)

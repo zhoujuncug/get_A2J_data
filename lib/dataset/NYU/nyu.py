@@ -145,7 +145,7 @@ def dataPreprocess(index, img, keypointsUVD, center, mean, std, lefttop_pixel, r
     imgResize = np.asarray(imgResize,dtype = 'float32')  # H*W*C
 
     imgResize[np.where(imgResize >= center[index][0][2] + depth_thres)] = center[index][0][2] + depth_thres# center[index][0][2] 
-    imgResize[np.where(imgResize <= center[index][0][2] - depth_thres)] = center[index][0][2] - depth_thres# center[index][0][2] 
+    imgResize[np.where(imgResize <= center[index][0][2] - depth_thres)] = center[index][0][2] + depth_thres# center[index][0][2] 
     imgResize = (imgResize - center[index][0][2])*RandomScale
 
     imgResize = (imgResize - mean) / std
