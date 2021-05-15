@@ -159,7 +159,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         fake_head = netA2J(fake, True)
         PrecG = 0
         for r_map, f_map in zip(real_head, fake_head):
-            PrecG += torch.nn.functional.mse_loss(r_map, f_map) * 500.
+            PrecG += torch.nn.functional.mse_loss(r_map, f_map) * 100.
 
         LossG = recG + errG + PrecG if is_gan else recG + PrecG
         # LossG = errG
@@ -189,12 +189,14 @@ for epoch in range(nepoch):
 
     is_gan = True # if epoch > 0 else False
     if epoch in [0, 1]:
-        p_D = 1 / 5.
+        p_D = 1.
+    elif epoch in [2, 3]
+        p_D = 1 / 2.
     else:
-        p_D = 1 / 5.
+        p_D = 1 / 3.
     p_G = 1.
 
-    log_dir = 'AE/P44_BDA_B16_IN_RL100_D1G5/'
+    log_dir = 'AE/PXX1L100_BDA_B16_IN_RL100_D1G3/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
