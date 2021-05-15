@@ -163,7 +163,7 @@ class ResNetBackBone(nn.Module):
         x3 = self.model.layer3(x2)  # (64, 1024, 11, 11)
         x4 = self.model.layer4(x3)  # (64, 2048, 11, 11)
         
-        return x3,x4  
+        return x, x1, x2, x3, x4   
 
 class A2J_model(nn.Module):
     def __init__(self, num_classes, is_3D=True):
@@ -176,7 +176,7 @@ class A2J_model(nn.Module):
             self.DepthRegressionModel = DepthRegressionModel(2048, num_classes=num_classes)        
     
     def forward(self, x): 
-        x3,x4 = self.Backbone(x)
+        x, x1, x2, x3, x4   = self.Backbone(x)
         # Anchor proposal branch
         classification  = self.classificationModel(x3)  # (64, 1936, 14) 
         # In-plain offset estimation branch
@@ -185,5 +185,5 @@ class A2J_model(nn.Module):
         if self.is_3D:
             # Depth estimation branch
             DepthRegressionModel  = self.DepthRegressionModel(x4)  # (64, 1936, 14)
-            return (classification, regression, DepthRegressionModel)  # (64, 1936, 14)  (64, 1936, 14, 2)  (64, 1936, 14)
+            return (x, x1, x2, x3, x4), (classification, regression, DepthRegressionModel)  # (64, 1936, 14)  (64, 1936, 14, 2)  (64, 1936, 14)
         return (classification, regression)

@@ -24,10 +24,10 @@ torch.set_printoptions(precision=8)
 from lib.model.AE.DCGAN import Encoder, Generator, Discriminator
 from lib.dataset.NYU.nyu import nyu_dataloader, center_train, train_lefttop_pixel, train_rightbottom_pixel, keypointsUVD_train, batch_size
 from lib.dataset.NYU.nyu import center_test, test_lefttop_pixel, test_rightbottom_pixel, keypointsUVD_test, errorCompute, writeTxt
-from lib.utils.AE.nyu.utils import show_batch_img
+from lib.utils.AE.nyu.utils import show_batch_img, show_imgs_draw_pose
 import lib.model.A2J.model as model
 import lib.model.A2J.anchor as anchor
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 # DataHyperParms 
 TrainImgFrames = 72757
@@ -98,8 +98,10 @@ netD = Discriminator().cuda()
 netD.apply(weights_init)
 
 netA2J = model.A2J_model(num_classes = keypointsNumber)
-netA2J.load_state_dict(torch.load('./output/checkpoint/A2J/official/NYU.pth'))
+netA2J.load_state_dict(torch.load('./output/checkpoint/A2J/BDA_net.pth'))
 netA2J = netA2J.cuda().eval()
+
+post_precess = anchor.post_process(shape=[cropHeight//16,cropWidth//16],stride=16,P_h=None, P_w=None).eval()
 
 criterion = nn.BCELoss()
 
@@ -159,14 +161,15 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         errG = criterion(output, label)
         
         # L1 Loss
-        recG = torch.nn.functional.l1_loss(img, fake) * 5 * 5 * 4
+        recG = torch.nn.functional.l1_loss(img, fake) * 100.
         
         # Preceptual Loss
-        real_head = netA2J(img)
-        fake_head = netA2J(fake)
-        PrecG = 0
-        for r_map, f_map in zip(real_head, fake_head):
-            PrecG += torch.nn.functional.mse_loss(r_map, f_map) * 1/2.
+        r_X, real_head = netA2J(img)
+        f_X, fake_head = netA2J(fake)
+
+        Prec_x1 = torch.nn.functional.mse_loss(r_X[1], f_X[1]) * 100.
+        Prec_x2 = torch.nn.functional.mse_loss(r_X[2], f_X[2]) * 100.
+        PrecG = (Prec_x1 + Prec_x2) * 30 * 2
 
         LossG = recG + errG + PrecG if is_gan else recG + PrecG
         # LossG = errG
@@ -186,9 +189,17 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
 
         if i % 1000 == 0:
             os.makedirs(f'output/log/nyu/{log_dir}', exist_ok=True)
-            real_fake = torch.cat([img[:, None, :, :, :], fake[:, None, :, :, :]], dim=1)
-            real_fake = real_fake.view([-1, img.shape[1], img.shape[2], img.shape[3]])
-            show_batch_img(real_fake, 'output/log/nyu/' + log_dir + f'{epoch}_{i}_{phase}.jpg', nrow=8)
+            real_keypoints = post_precess(real_head,voting=False)
+            fake_keypoints = post_precess(fake_head,voting=False)
+
+            img = img.detach().cpu().numpy()
+            fake = fake.detach().cpu().numpy()
+
+            real_keypoints = real_keypoints.detach().cpu().numpy()
+            fake_keypoints = fake_keypoints.detach().cpu().numpy()
+
+            show_imgs_draw_pose(real_keypoints, fake_keypoints, img, fake,
+                                f'output/log/nyu/{log_dir}' + f'{epoch}_{i}_{phase}.jpg')
 
 for epoch in range(nepoch):
     netE, netG, netD = netE.cuda(), netG.cuda(), netD.cuda()
@@ -196,19 +207,19 @@ for epoch in range(nepoch):
 
     is_gan = True # if epoch > 0 else False
     if epoch in [0]:
-        p_D = 1 / 2.
+        p_D = 1.
     elif epoch in [1]: 
-        p_D = 1 / 3.
+        p_D = 1 / 2.
     else:
-        p_D = 1 / 5.
+        p_D = 1 / 4.
     p_G = 1.
 
-    log_dir = 'AE/Prec_BDA_B16_IN_RL100_D1G5/'
+    log_dir = 'AE/PX1X2_D1G4/'
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
 
-    os.makedirs(f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}', exist_ok=True)
-    torch.save(netE.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/E.pth')
-    torch.save(netG.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/G.pth')
-    torch.save(netD.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'epoch_{epoch}/D.pth')
+    os.makedirs(f'./output/checkpoint/nyu/' + log_dir, exist_ok=True)
+    torch.save(netE.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'E.pth')
+    torch.save(netG.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'G.pth')
+    torch.save(netD.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'D.pth')
