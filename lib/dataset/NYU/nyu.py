@@ -53,8 +53,8 @@ def world2pixel(x, fx, fy, ux, uy):
 
 
 
-trainingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/train_nyu/'
-testingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/test_nyu/'  # mat images
+trainingImageDir = '/root/Dataspace/nyu_hand_dataset_v2/train_nyu/'
+testingImageDir = '/root/Dataspace/nyu_hand_dataset_v2/test_nyu/'  # mat images
 test_center_file = './data/nyu/nyu_center_test.mat'
 test_keypoint_file = './data/nyu/nyu_keypointsUVD_test.mat'
 train_center_file = './data/nyu/nyu_center_train.mat'

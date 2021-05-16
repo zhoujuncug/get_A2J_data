@@ -1,5 +1,5 @@
 import sys 
-sys.path.append('/root/get_A2J_data')
+sys.path.append('/root/Workspace/get_A2J_data')
 
 import cv2
 import torch
@@ -27,7 +27,7 @@ from lib.dataset.NYU.nyu import center_test, test_lefttop_pixel, test_rightbotto
 from lib.utils.AE.nyu.utils import show_batch_img, show_imgs_draw_pose
 import lib.model.A2J.model as model
 import lib.model.A2J.anchor as anchor
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 # DataHyperParms 
 TrainImgFrames = 72757
@@ -48,8 +48,8 @@ RandScale = (1.0, 0.5)
 xy_thres = 110
 depth_thres = 150
 
-trainingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/train_nyu/'
-testingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/test_nyu/'  # mat images
+trainingImageDir = '/root/Dataspace/nyu_hand_dataset_v2/train_nyu/'
+testingImageDir = '/root/Dataspace/nyu_hand_dataset_v2/test_nyu/'  # mat images
 test_center_file = './data/nyu/nyu_center_test.mat'
 test_keypoint_file = './data/nyu/nyu_keypointsUVD_test.mat'
 train_center_file = './data/nyu/nyu_center_train.mat'
@@ -98,7 +98,7 @@ netD = Discriminator().cuda()
 netD.apply(weights_init)
 
 netA2J = model.A2J_model(num_classes = keypointsNumber)
-netA2J.load_state_dict(torch.load('./output/checkpoint/A2J/BDA_net.pth'))
+netA2J.load_state_dict(torch.load('/root/Dataspace/output/checkpoint/A2J/BDA_net.pth'))
 netA2J = netA2J.cuda().eval()
 
 post_precess = anchor.post_process(shape=[cropHeight//16,cropWidth//16],stride=16,P_h=None, P_w=None).eval()
@@ -188,7 +188,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
               f'pD: {p_D:.2f} pE: {p_G:.2f}')
 
         if i % 1000 == 0:
-            os.makedirs(f'output/log/nyu/{log_dir}', exist_ok=True)
+            os.makedirs(f'/root/Dataspace/output/log/nyu/{log_dir}', exist_ok=True)
             real_keypoints = post_precess(real_head,voting=False)
             fake_keypoints = post_precess(fake_head,voting=False)
 
@@ -199,7 +199,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
             fake_keypoints = fake_keypoints.detach().cpu().numpy()
 
             show_imgs_draw_pose(real_keypoints, fake_keypoints, img, fake,
-                                f'output/log/nyu/{log_dir}' + f'{epoch}_{i}_{phase}.jpg')
+                                f'/root/Dataspace/output/log/nyu/{log_dir}' + f'{epoch}_{i}_{phase}.jpg')
 
 for epoch in range(nepoch):
     netE, netG, netD = netE.cuda(), netG.cuda(), netD.cuda()
@@ -209,17 +209,18 @@ for epoch in range(nepoch):
     if epoch in [0]:
         p_D = 1.
     elif epoch in [1]: 
-        p_D = 1 / 2.
+        p_D = 1.
     else:
-        p_D = 1 / 4.
+        p_D = 1.
     p_G = 1.
 
-    log_dir = 'AE/PX1X2_D1G4/'
+    log_dir = 'AE/PX1X2_D1G1/'
+    os.makedirs(f'/root/Dataspace/output/checkpoint/nyu/' + log_dir, exist_ok=True)
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
 
-    os.makedirs(f'./output/checkpoint/nyu/' + log_dir, exist_ok=True)
-    torch.save(netE.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'E.pth')
-    torch.save(netG.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'G.pth')
-    torch.save(netD.state_dict(), f'./output/checkpoint/nyu/' + log_dir + f'D.pth')
+    
+    torch.save(netE.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'E.pth')
+    torch.save(netG.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'G.pth')
+    torch.save(netD.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'D.pth')
