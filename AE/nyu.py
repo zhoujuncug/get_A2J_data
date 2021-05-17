@@ -27,7 +27,7 @@ from lib.dataset.NYU.nyu import center_test, test_lefttop_pixel, test_rightbotto
 from lib.utils.AE.nyu.utils import show_batch_img, show_imgs_draw_pose
 import lib.model.A2J.model as model
 import lib.model.A2J.anchor as anchor
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 # DataHyperParms 
 TrainImgFrames = 72757
@@ -171,7 +171,7 @@ def run_dataloader(dataloader, phase, is_gan, p_D, p_G, log_dir):
         Prec_x2 = torch.nn.functional.mse_loss(r_X[2], f_X[2]) * 100.
         PrecG = (Prec_x1 + Prec_x2) * 30 * 2
 
-        LossG = errG + PrecG if is_gan else recG + PrecG
+        LossG = recG + errG + PrecG if is_gan else recG + PrecG
         # LossG = errG
         LossG.backward()
 
@@ -214,7 +214,7 @@ for epoch in range(nepoch):
         p_D = 1 / 4.
     p_G = 1.
 
-    log_dir = 'AE/PX1X2_D1G4_WORL/'
+    log_dir = 'AE/PX1X2_D1G4/'
     os.makedirs(f'/root/Dataspace/output/checkpoint/nyu/' + log_dir, exist_ok=True)
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
