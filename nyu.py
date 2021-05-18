@@ -14,7 +14,7 @@ import lib.model.A2J.model as model
 import lib.model.A2J.anchor as anchor
 from lib.utils.utils import pixel2world, world2pixel, errorCompute, writeTxt
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 randomseed = 12345
 random.seed(randomseed)
@@ -137,7 +137,7 @@ for epoch in range(nepoch):
 
         img, label = img.cuda(), label.cuda()     
         
-        heads  = net(img)  # (64, 1936, 14)  (64, 1936, 14, 2)  (64, 1936, 14)
+        _, heads  = net(img)  # (64, 1936, 14)  (64, 1936, 14, 2)  (64, 1936, 14)
         #print(regression)     
         optimizer.zero_grad()  
         
@@ -184,7 +184,7 @@ for epoch in range(nepoch):
         for i, (img, label) in tqdm(enumerate(test_dataloaders)):
             with torch.no_grad():
                 img, label = img.cuda(), label.cuda()       
-                heads = net(img)  
+                _, heads = net(img)  
                 pred_keypoints = post_precess(heads, voting=False)
                 output = torch.cat([output,pred_keypoints.data.cpu()], 0)
 
@@ -200,7 +200,7 @@ for epoch in range(nepoch):
     %(epoch, train_loss_add, Cls_loss_add, Reg_loss_add, Error_test, scheduler.get_lr()[0]))
 
 
-net = model.A2J_model(num_classes = keypointsNumber)
+# net = model.A2J_model(num_classes = keypointsNumber)
 # net.load_state_dict(torch.load(model_dir))
 net = net.cuda()
 net.eval()
@@ -213,7 +213,7 @@ for i, (img, label) in tqdm(enumerate(test_dataloaders)):
     with torch.no_grad():
 
         img, label = img.cuda(), label.cuda()    
-        heads = net(img)  
+        _, heads = net(img)  
         pred_keypoints = post_precess(heads,voting=False)
         output = torch.cat([output,pred_keypoints.data.cpu()], 0)
     
@@ -227,3 +227,7 @@ writeTxt(result, center_test,
 error = errorCompute(result, keypointsUVD_test, center_test,
                      fx, fy, u0, v0, xy_thres, cropWidth, cropHeight)
 print('Error:', error)
+
+log_dir = 'A2J/ori_reimplement/'
+os.makedirs(f'/root/Dataspace/output/checkpoint/nyu/' + log_dir, exist_ok=True)
+torch.save(net.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + 'A2J.pth')
