@@ -58,7 +58,7 @@ except OSError:
 # using center point to get bbox, in this way, hand size on pixel level is basiclly equivalent.
 ################################################################################################
 # train
-trainingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/train_nyu/'
+trainingImageDir = '/root/Dataspace/nyu_hand_dataset_v2/train_nyu/'
 train_center_file = './data/nyu/nyu_center_train.mat'
 train_keypoint_file = './data/nyu/nyu_keypointsUVD_train.mat'
 
@@ -75,7 +75,7 @@ centerrightbottom_train[:,0,1] = centerrightbottom_train[:,0,1]-xy_thres
 train_rightbottom_pixel = world2pixel(centerrightbottom_train, fx, fy, u0, v0) # (72757, 1, 3)
 
 # test
-testingImageDir = '/home/public/nyu_hand_dataset_v2/A2J/test_nyu/'
+testingImageDir = '/root/Dataspace/nyu_hand_dataset_v2/test_nyu/'  # mat images
 test_center_file = './data/nyu/nyu_center_test.mat'
 test_keypoint_file = './data/nyu/nyu_keypointsUVD_test.mat'
 
