@@ -221,6 +221,6 @@ for epoch in range(nepoch):
     run_dataloader(test_dataloaders, 'Test', is_gan, p_D, p_G, log_dir)
 
     
-    torch.save(netE.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'E.pth')
-    torch.save(netG.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'G.pth')
-    torch.save(netD.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'D.pth')
+    torch.save(netE.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'{epoch}_E.pth')
+    torch.save(netG.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'{epoch}_G.pth')
+    torch.save(netD.state_dict(), f'/root/Dataspace/output/checkpoint/nyu/' + log_dir + f'{epoch}_D.pth')
