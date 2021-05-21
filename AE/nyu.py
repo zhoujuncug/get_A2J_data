@@ -211,10 +211,10 @@ for epoch in range(nepoch):
     elif epoch in [1]: 
         p_D = 1 / 2.
     else:
-        p_D = 1 / 4.
+        p_D = 1 / 2.
     p_G = 1.
 
-    log_dir = 'AE/PX1X2_D1G4_WORL/'
+    log_dir = 'AE/PX1X2_D1G2_WORL/'
     os.makedirs(f'/root/Dataspace/output/checkpoint/nyu/' + log_dir, exist_ok=True)
 
     run_dataloader(train_dataloaders, 'Train', is_gan, p_D, p_G, log_dir)
